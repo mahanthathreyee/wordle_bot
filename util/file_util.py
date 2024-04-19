@@ -27,3 +27,6 @@ def read_json(json_file: str | Path):
 def write_json(obj: Any, json_file: str | Path):
     with open(json_file, 'w') as f:
         return json.dump(obj, f)
+    
+def remove_file(file: str | Path):
+    os.remove(file)

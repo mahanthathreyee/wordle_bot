@@ -1,6 +1,6 @@
 import numpy as np
 
-from model.trie import Trie
+from model import Trie
 
 def get_possible_words(guess: str, pattern: str, word_trie: Trie):
     word_trie.reset_pos_info()
