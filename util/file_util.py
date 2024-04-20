@@ -19,6 +19,11 @@ def read_csv(csv_file: str | Path):
         reader = csv.reader(f, delimiter='\n')
         return [row[0] for row in reader]
     
+def write_csv(obj: Any, csv_file: str | Path, delimiter='\n'):
+    with open(csv_file, 'w') as f:
+        writer = csv.writer(f, delimiter=delimiter)
+        writer.writerow(obj)
+    
 def read_json(json_file: str | Path):
     with open(json_file) as f:
         data = json.load(f)
@@ -29,4 +34,5 @@ def write_json(obj: Any, json_file: str | Path):
         return json.dump(obj, f)
     
 def remove_file(file: str | Path):
-    os.remove(file)
+    if file_exists(file):
+        os.remove(file)

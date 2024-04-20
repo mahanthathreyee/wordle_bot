@@ -12,11 +12,14 @@ TileType = Enum('TileType', ['INCORRECT', 'MISPLACED', 'CORRECT'], start=0)
 
 #region Files
 DATA_DIR = Path('data/')
-PATTERNS_LOC = DATA_DIR / 'patterns.csv'
-WORD_LIST_LOC = DATA_DIR / 'word_list.csv'
-WORD_TREE_LOC = DATA_DIR / 'word_tree.csv'
+PATTERNS_LOC     = DATA_DIR / 'patterns.csv'
+WORD_LIST_LOC    = DATA_DIR / 'word_list.csv'
+WORD_TREE_LOC    = DATA_DIR / 'word_tree.csv'
+WORD_PATTERN_LOC = DATA_DIR / 'word_pattern.csv'
 #endregion
 
 #region Context Keys
-CONTEXT_WORD_TREE = 'word_tree'
+STATS_INFORMATION      = 'information'
+STATS_PROBABILITY      = 'probability'
+STATS_INFORMATION_GAIN = 'information_gain'
 #endregion

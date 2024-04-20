@@ -1,6 +1,7 @@
 import re
 import json
 import requests
+import math
 from bs4 import BeautifulSoup
 
 from util import file_util
@@ -47,6 +48,18 @@ def build_word_tree(word_list: list[str], reset_word_tree_file: bool = False) ->
     
     file_util.write_json(word_tree.root, WORD_TREE_LOC)
     return word_tree
+
+def retrieve_guess_patterns(reset_guess_file: bool = False):
+    if reset_guess_file:
+        file_util.remove_file(WORD_PATTERN_LOC)
+    
+    if file_util.file_exists(WORD_PATTERN_LOC):
+        return file_util.read_csv(WORD_PATTERN_LOC)
+    
+    patterns = _generate_pattern()
+
+    file_util.write_csv(patterns, WORD_PATTERN_LOC)
+    return patterns
     
 #region Internal Methods
 def _retrieve_wordle_page(wordle_url: str):
@@ -75,8 +88,21 @@ def _parse_all_js_files_for_words(js_file_urls: list[str]) -> list[str]:
         if word_list:
             return word_list
         
-def _store_word_list(word_list: list[str]):
-    with open(WORD_LIST_LOC, 'w') as f:
-        f.write('\n'.join(word_list))
+def _store_word_list(word_list: list[str]) -> list[str]:
+    file_util.write_csv(word_list, WORD_LIST_LOC)
     return word_list
+
+def _generate_pattern() -> list[str]:
+    patterns = []
+
+    def _generate_pattern_recursively(pattern='', size_left=WORD_SIZE):
+        if size_left == 0:
+            patterns.append(pattern)
+            return
+    
+        for type in TileType:
+            _generate_pattern_recursively(pattern+str(type.value), size_left-1)
+
+    _generate_pattern_recursively()
+    return patterns
 #endregion
