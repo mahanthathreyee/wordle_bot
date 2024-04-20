@@ -12,16 +12,11 @@ class TileLetters:
             TileType.CORRECT:   self._update_correct
         }
 
-    def update_tiles(self, word: str, pattern: str):
-        tile_pattern = self._parse_pattern(pattern=pattern)
-
+    def update_tiles(self, word: str, tile_pattern: list[TileType]):
         for idx, ch in enumerate(word):
             self._update_tile_func[tile_pattern[idx]](idx, ch)
 
     #region Internal Methods
-    def _parse_pattern(self, pattern: str) -> list[TileType]:
-        return [TileType(int(x)) for x in pattern]
-    
     def _update_correct(self, key: int, ch: str):
         self[key] = {ch}
     

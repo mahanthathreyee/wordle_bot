@@ -1,6 +1,5 @@
 #region Imports
 from enum import Enum
-import multiprocessing
 from pathlib import Path
 #endregion
 
@@ -18,6 +17,6 @@ WORD_LIST_LOC = DATA_DIR / 'word_list.csv'
 WORD_TREE_LOC = DATA_DIR / 'word_tree.csv'
 #endregion
 
-#region Multiprocessor
-JOB_POOL_PROCESS = multiprocessing.cpu_count()
+#region Context Keys
+CONTEXT_WORD_TREE = 'word_tree'
 #endregion
