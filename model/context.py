@@ -1,5 +1,10 @@
-from model import Trie
+from __future__ import annotations
+
 from wordle import words
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from model import Trie
 
 class Context:
     n_words: int = 0
@@ -15,6 +20,4 @@ class Context:
             word_list=self.word_list
         )
 
-        self.guess_patterns = words.retrieve_guess_patterns(
-            reset_guess_file=True
-        )
+        self.guess_patterns = words.retrieve_guess_patterns()

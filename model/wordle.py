@@ -1,22 +1,26 @@
 from __future__ import annotations
 
-from model import TileLetters
 from util import info_gain_util
 from constants.app_constants import *
+from model.tile_letters import TileLetters
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from model import Context
-
 class Wordle:
-    guesses: list[str] = [''] * WORD_SIZE
-    guess_tiles: list[list[TileType]] = []
-    tile_letters: TileLetters = TileLetters()
-    possible_words_left: set[str] = set()
-    stats: dict[str, float] = {
-        STATS_PROBABILITY:      0,
-        STATS_INFORMATION:      0
-    }
+    guesses: list[str]
+    guess_tiles: list[list[TileType]]
+    tile_letters: TileLetters
+    possible_words_left: set[str]
+
+    stats_probability = 0
+    stats_information = 0
+
+    def __init__(self) -> None:
+        self.guesses = []
+        self.guess_tiles = []
+        self.tile_letters = TileLetters()
+        self.possible_words_left = set()
 
     def add_guess(self, guess: str, pattern: list[TileType], context: Context):
         self.guesses.append(guess)
@@ -28,11 +32,11 @@ class Wordle:
         
     #region Internal Methods
     def _compute_stats(self, n_words: int):
-        self.stats[STATS_PROBABILITY] = info_gain_util.compute_probability(
+        self.stats_probability = info_gain_util.compute_probability(
             possible_words_count=len(self.possible_words_left), 
             total_words_count=n_words
         )
-        self.stats[STATS_INFORMATION] = info_gain_util.compute_information(
-            p_word=self.stats[STATS_PROBABILITY]
+        self.stats_information = info_gain_util.compute_information(
+            p_word=self.stats_probability
         )
     #endregion

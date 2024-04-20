@@ -2,10 +2,13 @@ import string
 from constants.app_constants import *
 
 class TileLetters:
-    tiles = [set(string.ascii_lowercase) for _ in range(WORD_SIZE)]
-    misplaced_chars = set()
+    tiles: list[set[str]]
+    misplaced_chars: set[str]
 
     def __init__(self) -> None:
+        self.tiles = [set(string.ascii_lowercase) for _ in range(WORD_SIZE)]
+        self.misplaced_chars = set()
+
         self._update_tile_func = {
             TileType.INCORRECT: self._update_incorrect,
             TileType.MISPLACED: self._update_misplaced,

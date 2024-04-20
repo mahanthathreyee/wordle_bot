@@ -21,5 +21,4 @@ WORD_PATTERN_LOC = DATA_DIR / 'word_pattern.csv'
 #region Context Keys
 STATS_INFORMATION      = 'information'
 STATS_PROBABILITY      = 'probability'
-STATS_INFORMATION_GAIN = 'information_gain'
 #endregion

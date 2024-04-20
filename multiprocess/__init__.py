@@ -1,1 +1,1 @@
-from .job_pool import JobPool
+from .job_pool import ProcessPool

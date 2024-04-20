@@ -60,7 +60,21 @@ def retrieve_guess_patterns(reset_guess_file: bool = False):
 
     file_util.write_csv(patterns, WORD_PATTERN_LOC)
     return patterns
-    
+
+def reset_all_data():
+    word_list = retrieve_store_nyt_word_list(
+        reset_word_list_file=True
+    )
+
+    build_word_tree(
+        word_list=word_list,
+        reset_word_tree_file=True
+    )
+
+    retrieve_guess_patterns(
+        reset_guess_file=True
+    )
+
 #region Internal Methods
 def _retrieve_wordle_page(wordle_url: str):
     res = requests.get(wordle_url)

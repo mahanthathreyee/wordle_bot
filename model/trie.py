@@ -1,6 +1,10 @@
-from typing import Self
-from model import TileLetters
+from __future__ import annotations
+
+from typing import Self, TYPE_CHECKING
 from constants.app_constants import *
+
+if TYPE_CHECKING:
+    from model import TileLetters
 
 __END__ = '__end__'
 
