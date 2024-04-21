@@ -1,4 +1,6 @@
 import string
+
+from model.tile_type import TileType
 from constants.app_constants import *
 
 class TileLetters:
@@ -17,7 +19,10 @@ class TileLetters:
 
     def update_tiles(self, word: str, tile_pattern: list[TileType]):
         for idx, ch in enumerate(word):
-            self._update_tile_func[tile_pattern[idx]](idx, ch)
+            try:
+                self._update_tile_func[tile_pattern[idx]](idx, ch)
+            except Exception as e:
+                print(e)
 
     #region Internal Methods
     def _update_correct(self, key: int, ch: str):
@@ -46,4 +51,12 @@ class TileLetters:
             raise TypeError('key must be integer.')
         
         self.tiles[key] = tile
+    
+    def __json__(self):
+        return {
+            'tiles': self.tiles,
+            'misplaced_chars': self.misplaced_chars,
+            
+            '__classname__': str(self.__class__.__name__)
+        }
     #endregion

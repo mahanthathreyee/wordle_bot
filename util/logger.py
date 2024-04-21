@@ -50,5 +50,5 @@ def configure_logger(reset_log_file=False) -> logging.Logger:
         
     logger = logging.getLogger()
     logger.setLevel(logging.getLevelName(LOGGER_LEVEL))
-    logger.addHandler(get_console_handler())
+    # logger.addHandler(get_console_handler())
     logger.addHandler(get_file_handler(LOGGER_FILE))

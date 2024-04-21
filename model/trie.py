@@ -57,4 +57,11 @@ class Trie:
             return NotImplemented
         self.add(other)
         return self
+    
+    def __json__(self):
+        return {
+            'root': self.root,
+
+            '__classname__': str(self.__class__.__name__)
+        }
     #endregion

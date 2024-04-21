@@ -1,6 +1,7 @@
 import os
 import csv
 import json
+import shutil
 from pathlib import Path
 
 from typing import Any
@@ -36,3 +37,10 @@ def write_json(obj: Any, json_file: str | Path):
 def remove_file(file: str | Path):
     if file_exists(file):
         os.remove(file)
+
+def create_folder(folder: str | Path):
+    folder_pth = Path(folder)
+    folder_pth.mkdir(parents=True, exist_ok=True)
+
+def remove_folder(folder: str | Path):
+    shutil.rmtree(folder)

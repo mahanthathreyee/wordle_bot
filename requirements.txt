@@ -4,3 +4,4 @@ plotly==5.21.0
 numpy==1.26.4
 tqdm==4.66.2
 lxml==5.2.1
+json-fix==1.0.0
