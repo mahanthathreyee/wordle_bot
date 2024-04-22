@@ -86,10 +86,6 @@ def reset_all_data():
     retrieve_guess_patterns(
         reset_guess_file=True
     )
-
-    logging.info('Resetting first information gain folder')
-    file_util.remove_folder(WORD_FIRST_INFO_LOC)
-
 #region Internal Methods
 def _retrieve_wordle_page(wordle_url: str):
     logging.info(f'Retrieving Wordle page from URL: {wordle_url}')

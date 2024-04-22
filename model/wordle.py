@@ -1,6 +1,7 @@
 from __future__ import annotations
 import json_fix
 
+from util import wordle_util
 from util import info_gain_util
 from model.tile_type import TileType
 from model.tile_letters import TileLetters
@@ -53,7 +54,9 @@ class Wordle:
         db_str = ''
         
         for g, p in zip(self.guesses, self.tile_patterns):
-            db_str += f'{g}_{p}'
+            db_str += f'{g}_{wordle_util.parse_tile_pattern_to_int(p)}'
+        
+        return db_str
         
     #region Internal Methods
     def _compute_stats(self, n_words: int):

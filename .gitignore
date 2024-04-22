@@ -1,6 +1,9 @@
+temp/
+temp.*
+**/*.log
+service_containers/backup
+
 env/
 **/__pycache__/
-temp.*
-temp/
 **/.DS_Store
-**/*.log
+

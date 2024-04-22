@@ -15,6 +15,9 @@ def parse_int_tile_pattern(pattern: int | str) -> list[TileType]:
 
     return [TileType(int(ch)) for ch in pattern]
 
+def parse_tile_pattern_to_int(pattern: list[TileType]):
+    return ''.join([str(p.value) for p in pattern])
+
 def compressed_first_word_info(wordle_words: dict[str, WordleWord]) -> dict[str, Any]:
     data = {}
 

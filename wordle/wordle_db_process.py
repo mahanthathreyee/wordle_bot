@@ -1,4 +1,5 @@
 from model import WordleDB
+from constants.db_constants import *
 from multiprocessing import Process, Manager, Queue
 
 __STOP_PROCESS__ = '__stop_process__'
@@ -9,7 +10,9 @@ db_queue: Queue = None
 def _process_queue(db_queue: Queue):
     wordle_db = WordleDB(readonly=False)
     db_fn_mapper = {
-        'INSERT_WORD_INFO': wordle_db.insert_word_info
+        DB_KEY_INSERT_WORD_INFO:          wordle_db.insert_word_info,
+        DB_KEY_INSERT_SECOND_WORD_STATUS: wordle_db.insert_second_word_status,
+        DB_KEY_UPDATE_SECOND_WORD_STATUS: wordle_db.update_second_word_status
     }
     
     while True:
