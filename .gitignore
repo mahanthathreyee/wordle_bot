@@ -4,5 +4,3 @@ temp.*
 temp/
 **/.DS_Store
 **/*.log
-
-data/first_info

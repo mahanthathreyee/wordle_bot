@@ -30,6 +30,12 @@ DB_NAME     = 'wordle'
 #endregion
 
 #region SQL Queries
-INSERT_INFO_GAIN = 'INSERT INTO information_gain (word, info_gain, info_level) VALUES (%s, %s, %s) ON CONFLICT DO NOTHING'
-SELECT_WORD_INFO = 'SELECT * FROM information_gain WHERE word=%s'
+INSERT_INFO_GAIN     = 'INSERT INTO information_gain (word, info_gain, info_level) \
+                            VALUES (%s, %s, %s)                                       \
+                            ON CONFLICT DO NOTHING'
+SELECT_WORD_INFO     = 'SELECT * FROM information_gain WHERE word=%s'
+SELECT_WORD_MAX_INFO = 'SELECT word, info_gain FROM information_gain WHERE info_gain=( \
+                            SELECT MAX(info_gain) FROM information_gain                \
+                                WHERE info_level=%s                                    \
+                        );'
 #endregion

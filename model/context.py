@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from util import logger
-from wordle import words
+from wordle import retrieve_dataset
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -18,14 +18,14 @@ class Context:
     def __init__(self):
         logger.configure_logger()
         
-        self.word_list = words.retrieve_store_nyt_word_list()
+        self.word_list = retrieve_dataset.retrieve_store_nyt_word_list()
         self.n_words = len(self.word_list)
 
-        self.word_tree: Trie = words.build_word_tree(
+        self.word_tree: Trie = retrieve_dataset.build_word_tree(
             word_list=self.word_list
         )
 
-        self.guess_patterns = words.retrieve_guess_patterns()
+        self.guess_patterns = retrieve_dataset.retrieve_guess_patterns()
 
         self.word_to_id_map = self._generate_word_to_id()
         self.id_to_word_map = self._generate_id_to_word()

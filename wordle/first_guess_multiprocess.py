@@ -1,3 +1,4 @@
+#region Imports
 import logging
 import itertools
 from tqdm import tqdm
@@ -7,6 +8,7 @@ from multiprocessing import Process, Manager, Queue
 from wordle import first_guess_ig
 from wordle import wordle_db_process
 from constants.app_constants import *
+#endregion
 
 __STOP_PROCESS__ = '__stop_process__'
 
@@ -20,7 +22,7 @@ def process_word_list(word_list: list[str]):
     job_params = (word_queue, db_queue, 1, progress_queue)
     logging.info('Starting processes to process queue')
     ProcessPool().submit(
-        func=first_guess_ig.compute_words,
+        func=first_guess_ig.process_word_queue,
         params=itertools.repeat(job_params, ProcessPool().n_process), 
         starmap=True
     )
@@ -42,6 +44,18 @@ def _create_word_queue(word_list: list[str]) -> Queue:
 
     return word_queue
 
+def _progress__tracker_queue(n_words: int) -> Queue:
+    manager = Manager()
+    progress_queue = manager.Queue()
+    
+    tracker_process = Process(
+        target=_progress_tracker,
+        args=(n_words, progress_queue)
+    )
+    tracker_process.start()
+
+    return progress_queue
+
 def _progress_tracker(n_words: int, progress_queue: Queue):
         pbar = tqdm(
             total=n_words,
@@ -54,17 +68,5 @@ def _progress_tracker(n_words: int, progress_queue: Queue):
                 break
 
             pbar.update(1)
-
-def _progress__tracker_queue(n_words: int) -> Queue:
-    manager = Manager()
-    progress_queue = manager.Queue()
-    
-    tracker_process = Process(
-        target=_progress_tracker,
-        args=(n_words, progress_queue)
-    )
-    tracker_process.start()
-
-    return progress_queue
 
 #endregion

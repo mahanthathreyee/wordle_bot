@@ -25,7 +25,7 @@ def compute_word_patterns(word: str, base_wordle: Wordle=None) -> WordleWord:
 
     return wordle_word
 
-def compute_words(word_queue: Queue, db_queue: Queue, info_level: int=1, progress_queue: Queue=None):
+def process_word_queue(word_queue: Queue, db_queue: Queue, info_level: int=1, progress_queue: Queue=None):
     read_db_conn = WordleDB()
 
     while True:
@@ -52,7 +52,7 @@ def compute_words(word_queue: Queue, db_queue: Queue, info_level: int=1, progres
 def _compute_word_pattern(guess: str, pattern: str, base_wordle: Wordle = None) -> Wordle:
     tile_pattern = wordle_util.parse_int_tile_pattern(pattern=pattern)
     
-    game = base_wordle or Wordle()
+    game = base_wordle.copy() if base_wordle else Wordle()
     game.add_guess(
         guess=guess,
         pattern=tile_pattern,

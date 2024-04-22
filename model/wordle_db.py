@@ -28,6 +28,17 @@ class WordleDB:
             res = cursor.fetchone()
             self._db_conn.commit()
         return res
+    
+    def get_word_max_info(self, info_level: int) -> str:
+        res = None
+        with self._db_conn.cursor() as cursor:
+            cursor.execute(
+                query=SELECT_WORD_MAX_INFO,
+                vars=(info_level, )
+            )
+            res = cursor.fetchone()
+            self._db_conn.commit()
+        return res[0], res[1]
         
     def close(self):
         self._db_conn.close()
