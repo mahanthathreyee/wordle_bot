@@ -1,11 +1,12 @@
-import json
 import logging
 from tqdm import tqdm
-from multiprocessing import current_process
+from multiprocessing import Queue
 
 from model import Wordle
-from model import Context
+from model import WordleDB
 from model import WordleWord
+from model.context import Context
+from model.wordle_exception import WordleException
 
 from util import file_util
 from util import wordle_util
@@ -13,43 +14,45 @@ from util import info_gain_util
 from constants.app_constants import *
 
 context = Context()
+__STOP_PROCESS__ = '__stop_process__'
 
-def compute_word_patterns(word: str) -> WordleWord:
+def compute_word_patterns(word: str, base_wordle: Wordle=None) -> WordleWord:
     logging.info(f'Computing info for word: {word}')
-    wordle_word = _compute_word(word)
+    wordle_word = _compute_word(word, base_wordle)
     wordle_word.information_gain = _compute_information_gain(
         wordle_word=wordle_word
     )
 
     return wordle_word
 
-def compute_words(words: list[str], job_id: int=0) -> dict[str, WordleWord]:
-    words_ig = {}
-    first_info_file = f'{WORD_FIRST_INFO_LOC}/{WORD_FIRST_INFO_FILE_PREFIX}_{len(words)}_{job_id}.json'
+def compute_words(word_queue: Queue, db_queue: Queue, info_level: int=1, progress_queue: Queue=None):
+    read_db_conn = WordleDB()
 
-    if file_util.file_exists(first_info_file):
-        logging.info('Word job already completed, skipping computation')
-        return
-    
-    logging.info(f'Computing info for word list - length {len(words)} ')
-    p_id = current_process()._identity[0] - 1
-    for word in tqdm(words, desc=f'Word list part {job_id}', position=p_id):
-        words_ig[word] = compute_word_patterns(word)
-    
-    logging.info(f'Storing all words info to file: {first_info_file}')
-    compressed_data = wordle_util.compressed_first_word_info(words_ig)
-    file_util.write_json(
-        obj=json.dumps(compressed_data),
-        json_file=first_info_file
-    )
+    while True:
+        word = word_queue.get()
+        if word == __STOP_PROCESS__:
+            logging.info('Stopping process')
+            break
 
-    return words_ig
+        word_info_from_db = read_db_conn.get_word_info(word)
+
+        if word_info_from_db:
+            logging.info('Word already computed, skipping computation')
+            continue
+
+        word_info = compute_word_patterns(word)
+        db_queue.put(
+            ('INSERT_WORD_INFO', (word, word_info.information_gain, info_level))
+        )
+
+        if progress_queue:
+            progress_queue.put(1)
 
 #region Internal Methods
-def _compute_word_pattern(guess: str, pattern: str) -> Wordle:
+def _compute_word_pattern(guess: str, pattern: str, base_wordle: Wordle = None) -> Wordle:
     tile_pattern = wordle_util.parse_int_tile_pattern(pattern=pattern)
     
-    game = Wordle()
+    game = base_wordle or Wordle()
     game.add_guess(
         guess=guess,
         pattern=tile_pattern,
@@ -58,18 +61,28 @@ def _compute_word_pattern(guess: str, pattern: str) -> Wordle:
 
     return game
 
-def _compute_word(guess: str) -> WordleWord:
+def _compute_word(guess: str, base_wordle: Wordle=None) -> WordleWord:
     patterns = context.guess_patterns
     
     wordle_patterns = {}
     for pattern in patterns:
-        wordle_patterns[pattern] = _compute_word_pattern(
-            guess=guess,
-            pattern=pattern
-        )
+        try:
+            wordle_patterns[pattern] = _compute_word_pattern(
+                guess=guess,
+                pattern=pattern,
+                base_wordle=base_wordle.copy() if base_wordle else None
+            )
+        except WordleException as w_ex:
+            # Exception raised if an already misplaced character is marked as 
+            # incorrect character in the new pattern
+            continue
+    
+    wordle_word = guess
+    if base_wordle:
+        wordle_word = base_wordle.get_guess_pattern_for_db()
     
     word = WordleWord(
-        word=guess, 
+        word=wordle_word, 
         word_id=context.word_to_id_map[guess]
     )
     word.patterns = wordle_patterns
@@ -77,12 +90,10 @@ def _compute_word(guess: str) -> WordleWord:
     return word
 
 def _compute_information_gain(wordle_word: WordleWord) -> float:
-    patterns = context.guess_patterns
+    p_words = [0] * len(wordle_word.patterns)
+    i_words = [0] * len(wordle_word.patterns)
 
-    p_words = [0] * len(context.guess_patterns)
-    i_words = [0] * len(context.guess_patterns)
-
-    for idx, pattern in enumerate(patterns):
+    for idx, pattern in enumerate(wordle_word.patterns):
         p_words[idx] = wordle_word[pattern].stats_probability
         i_words[idx] = wordle_word[pattern].stats_information
     

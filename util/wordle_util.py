@@ -26,8 +26,7 @@ def compressed_first_word_info(wordle_words: dict[str, WordleWord]) -> dict[str,
         for pattern, pattern_info in wordle.patterns.items():
             data[word]['patterns'][pattern] = {
                 'prob': pattern_info.stats_probability,
-                'info': pattern_info.stats_information,
-                'pos_words': pattern_info.possible_words_left
+                'info': pattern_info.stats_information
             }
     
     return data

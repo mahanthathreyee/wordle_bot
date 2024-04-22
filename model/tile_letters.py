@@ -1,7 +1,10 @@
 import string
 
+from typing import Self
+
 from model.tile_type import TileType
 from constants.app_constants import *
+from model.wordle_exception import WordleException
 
 class TileLetters:
     tiles: list[set[str]]
@@ -19,10 +22,17 @@ class TileLetters:
 
     def update_tiles(self, word: str, tile_pattern: list[TileType]):
         for idx, ch in enumerate(word):
-            try:
-                self._update_tile_func[tile_pattern[idx]](idx, ch)
-            except Exception as e:
-                print(e)
+            self._update_tile_func[tile_pattern[idx]](idx, ch)
+
+
+    def copy(self) -> Self:
+        other = TileLetters()
+
+        for idx, tile in enumerate(self.tiles):
+            other.tiles[idx] = tile.copy()
+        other.misplaced_chars = self.misplaced_chars.copy()
+
+        return other
 
     #region Internal Methods
     def _update_correct(self, key: int, ch: str):
@@ -33,6 +43,9 @@ class TileLetters:
         self.misplaced_chars.add(ch)
     
     def _update_incorrect(self, key: int, ch: str):
+        if ch in self.misplaced_chars:
+            raise WordleException
+        
         for tile in self.tiles:
             tile.discard(ch)
     #endregion
