@@ -1,4 +1,4 @@
-from model import Wordle
+from .wordle import Wordle
 
 from constants.app_constants import *
 

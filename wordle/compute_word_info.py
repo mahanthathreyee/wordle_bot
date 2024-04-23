@@ -1,14 +1,11 @@
 import logging
-from tqdm import tqdm
-from multiprocessing import Queue, current_process
+from multiprocessing import Queue
 
 from model import Wordle
-from model import WordleDB
 from model import WordleWord
-from model.context import Context
-from model.wordle_exception import WordleException
+from model import WordleException
+from model import Context
 
-from util import file_util
 from util import wordle_util
 from util import info_gain_util
 
@@ -18,7 +15,52 @@ from constants.db_constants import *
 context = Context()
 __STOP_PROCESS__ = '__stop_process__'
 
-def compute_word_patterns(word: str, base_wordle: Wordle=None) -> WordleWord:
+def process_word_queue(word_queue: Queue, progress_queue: Queue):
+    while True:
+        msg = word_queue.get()
+        logging.info(f'Received message: {msg}')
+
+        if msg == __STOP_PROCESS__:
+            logging.info('Stop process signal received. Stopping process...')
+            break
+
+        msg_parts = msg.split('_')
+        next_word = msg_parts[-1]
+        prefix = '_'.join(msg_parts[:-1])
+        logging.info(f'Computing information gain | Prefix: {prefix}, Next word: {next_word}')
+
+        base_wordle = get_base_wordle(prefix=prefix)
+        logging.info(f'Base wordle computed | Prefix: {prefix}, Next word: {next_word}')
+
+        next_word_info = _compute_word_patterns(
+            word=next_word,
+            base_wordle=base_wordle.copy()
+        )
+        logging.info(f'Info computed: {next_word_info.information_gain} | Prefix: {prefix}, Next word: {next_word}')
+        
+        progress_queue.put({
+            'prefix': base_wordle.get_db_prefix(),
+            'next_word': next_word,
+            'info_gain': next_word_info.information_gain
+        })
+
+def get_base_wordle(prefix) -> Wordle:
+    prefix_parts = prefix.split('_')
+    base_words, base_patterns = prefix_parts[::2], prefix_parts[1::2]
+    
+    # Default base wordle with empty guess and dummy pattern
+    base_wordle = _compute_word_pattern('', context.guess_patterns[0]) if not prefix else None
+    for w, p in zip(base_words, base_patterns):
+        base_wordle = _compute_word_pattern(
+            guess=w,
+            pattern=p,
+            base_wordle=base_wordle
+        )
+    
+    return base_wordle
+
+#region Internal Methods
+def _compute_word_patterns(word: str, base_wordle: Wordle=None) -> WordleWord:
     logging.info(f'Computing info for word: {word}')
     wordle_word = _compute_word(word, base_wordle)
     wordle_word.information_gain = _compute_information_gain(
@@ -27,79 +69,6 @@ def compute_word_patterns(word: str, base_wordle: Wordle=None) -> WordleWord:
 
     return wordle_word
 
-def process_word_queue(word_queue: Queue, db_queue: Queue, progress_queue: Queue=None):
-    info_level = 1
-
-    while True:
-        word = word_queue.get()
-        if word == __STOP_PROCESS__:
-            logging.info('Stopping process')
-            break
-
-        word_info_from_db = context.read_db_conn.get_first_word_info(word)
-        if not word_info_from_db:
-            word_info = compute_word_patterns(word)
-            db_queue.put(
-                (DB_KEY_INSERT_WORD_INFO, (word, word_info.information_gain, info_level))
-            )
-        else:
-            logging.info('Word already computed, skipping computation')
-
-        if progress_queue:
-            progress_queue.put(1)
-
-def process_second_word_queue(word_queue: Queue, db_queue: Queue, progress_queue: Queue=None):
-    info_level = 2
-    p_id = current_process()._identity[0] - 1
-
-    while True:
-        word, pattern = word_queue.get()
-        if word == __STOP_PROCESS__:
-            logging.info('Stopping process')
-            break
-
-        try:
-            base_wordle = _compute_word_pattern(
-                guess=word,
-                pattern=pattern
-            )
-        except WordleException as e:
-            continue
-        base_word_from_db = context.read_db_conn.get_first_word_info(word)
-        base_word_id = base_word_from_db[0]
-
-        logging.info(f'Processing base word-pattern: {word}_{pattern} | Possible words: {len(base_wordle.possible_words_left)}')
-        for possible_word_id in tqdm(base_wordle.possible_words_left, desc=f'Processing {word}_{pattern}', position=p_id, leave=False):
-            possible_word = context.id_to_word_map[possible_word_id]
-            word_info_from_db = context.read_db_conn.get_second_word_info(f'{word}_{pattern}_{possible_word}', base_word_id)
-            
-            if not word_info_from_db:            
-                try:
-                    next_word_info = compute_word_patterns(
-                        word=possible_word,
-                        base_wordle=base_wordle.copy()
-                    )
-
-                    db_values = (
-                        f'{word}_{pattern}_{possible_word}', 
-                        next_word_info.information_gain, 
-                        info_level, 
-                        base_word_id
-                    )
-                    
-                    db_queue.put(
-                        (DB_KEY_INSERT_WORD_INFO, db_values)
-                    )
-                except WordleException as e:
-                    continue
-            else:
-                logging.info('Word already computed, skipping computation')
-        
-        logging.info(f'Completed processing base word-pattern: {word}_{pattern}')
-        if progress_queue:
-            progress_queue.put(1)
-
-#region Internal Methods
 def _compute_word_pattern(guess: str, pattern: str, base_wordle: Wordle = None) -> Wordle:
     tile_pattern = wordle_util.parse_int_tile_pattern(pattern=pattern)
     
@@ -130,7 +99,7 @@ def _compute_word(guess: str, base_wordle: Wordle=None) -> WordleWord:
     
     wordle_word = guess
     if base_wordle:
-        wordle_word = base_wordle.get_guess_pattern_for_db()
+        wordle_word = base_wordle.get_db_prefix()
     
     word = WordleWord(
         word=wordle_word, 

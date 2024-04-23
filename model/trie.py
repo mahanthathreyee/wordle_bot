@@ -4,7 +4,7 @@ from typing import Self, TYPE_CHECKING
 from constants.app_constants import *
 
 if TYPE_CHECKING:
-    from model import TileLetters
+    from .tile_letters import TileLetters
 
 __END__ = '__end__'
 

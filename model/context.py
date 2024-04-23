@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from util import logger
-from model import WordleDB
+from .wordle_db import WordleDB
 from wordle import retrieve_dataset
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from model import Trie
+    from .trie import Trie
 
 class Context:
     n_words: int = 0
@@ -15,7 +15,7 @@ class Context:
     guess_patterns: list[str] = []
     word_to_id_map: dict[str, int] = {}
     id_to_word_map: dict[str, int] = {}
-    read_db_conn: WordleDB = None
+    db_conn: WordleDB = None
 
     def __init__(self):
         logger.configure_logger()
@@ -32,7 +32,7 @@ class Context:
         self.word_to_id_map = self._generate_word_to_id()
         self.id_to_word_map = self._generate_id_to_word()
 
-        self.read_db_conn = WordleDB(readonly=True)
+        self.db_conn = WordleDB()
 
     #region Internal Methods
     def _generate_word_to_id(self) -> dict[str, int]:

@@ -3,13 +3,13 @@ import json_fix
 
 from util import wordle_util
 from util import info_gain_util
-from model.tile_type import TileType
-from model.tile_letters import TileLetters
+from .tile_letters import TileLetters
 from constants.app_constants import *
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from model import Context
+    from .context import Context
+    from .tile_type import TileType
 
 class Wordle:
     guesses: list[str]
@@ -50,13 +50,9 @@ class Wordle:
 
         return other
     
-    def get_guess_pattern_for_db(self):
-        db_str = ''
-        
-        for g, p in zip(self.guesses, self.tile_patterns):
-            db_str += f'{g}_{wordle_util.parse_tile_pattern_to_int(p)}'
-        
-        return db_str
+    def get_db_prefix(self):
+        return '_'.join(f'{g}_{wordle_util.parse_tile_pattern_to_int(p)}' \
+                            for g, p in zip(self.guesses, self.tile_patterns))
         
     #region Internal Methods
     def _compute_stats(self, n_words: int):

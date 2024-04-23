@@ -2,9 +2,9 @@ import string
 
 from typing import Self
 
-from model.tile_type import TileType
+from .tile_type import TileType
 from constants.app_constants import *
-from model.wordle_exception import WordleException
+from .wordle_exception import WordleException
 
 class TileLetters:
     tiles: list[set[str]]
