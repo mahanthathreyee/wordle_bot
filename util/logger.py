@@ -2,7 +2,7 @@
 import os
 import sys
 import logging
-from logging.handlers import RotatingFileHandler
+import multiprocessing_logging
 
 from util import file_util
 from constants.logger_constants import *
@@ -29,10 +29,7 @@ def configure_logger(reset_log_file=False) -> logging.Logger:
     logger.addHandler(_get_file_handler(LOGGER_FILE))
     # logger.addHandler(get_console_handler())
 
-def do_rollover():
-    logger = logging.getLogger()
-    rotating_file_handler: RotatingFileHandler = logger.handlers[0]
-    rotating_file_handler.doRollover()
+    multiprocessing_logging.install_mp_handler(logger)
 
 #region FILTERS
 class _RemoveTQDMLog(logging.Filter):
@@ -58,7 +55,7 @@ def _get_console_handler():
     return console_handler
 
 def _get_file_handler(logger_file):
-    file_handler = RotatingFileHandler(filename=logger_file, backupCount=20)
+    file_handler = logging.FileHandler(filename=logger_file)
     file_handler.setFormatter(logging.Formatter(FILE_LOGGER_FORMAT, datefmt=LOGGER_DATE_FORMAT))
     return file_handler
 #endregion

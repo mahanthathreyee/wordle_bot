@@ -46,7 +46,6 @@ def process_first_word_list(word_list: list[str]):
     
     wordle_db_process.stop_process()
     progress_queue.put(__STOP_PROCESS__)
-    logger.do_rollover()
 
 def process_second_word_list():
     logging.info(f'Computing second guess information for top 25 fist words information gain')
@@ -59,7 +58,6 @@ def process_second_word_list():
         
         # Clear screen
         print("\033[H\033[J", end="")
-        logger.do_rollover()
 
 #region Internal Methods
 def _process_second_word(base_word: str):
