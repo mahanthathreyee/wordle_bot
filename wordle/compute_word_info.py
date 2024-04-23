@@ -1,4 +1,5 @@
 import logging
+from tqdm import tqdm
 from multiprocessing import Queue
 
 from model import Wordle
@@ -43,6 +44,23 @@ def process_word_queue(word_queue: Queue, progress_queue: Queue):
             'next_word': next_word,
             'info_gain': next_word_info.information_gain
         })
+
+def process_word_list_without_queue(word_list: list[str], base_wordle: Wordle) -> tuple[str, float]:
+    result = [None] * len(word_list)
+    
+    for idx, next_word in enumerate(tqdm(word_list, desc='Word list processing (same process)', position=2, leave=False)):
+        next_word_info = _compute_word_patterns(
+            word=next_word,
+            base_wordle=base_wordle.copy()
+        )
+        result[idx] = {
+            'prefix': base_wordle.get_db_prefix(),
+            'next_word': next_word,
+            'info_gain': next_word_info.information_gain
+        }
+    
+    max_next_word_dict = max(result, key=lambda x: x['info_gain'])
+    return max_next_word_dict['next_word'], max_next_word_dict['info_gain']
 
 def get_base_wordle(prefix) -> Wordle:
     prefix_parts = prefix.split('_')
