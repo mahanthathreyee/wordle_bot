@@ -1,9 +1,9 @@
 temp/
 temp.*
-**/*.log
+logs/
+**/*.log*
 service_containers/backup
 
 env/
 **/__pycache__/
 **/.DS_Store
-

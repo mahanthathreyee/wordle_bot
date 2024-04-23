@@ -5,6 +5,7 @@ from tqdm import tqdm
 from multiprocess import ProcessPool
 from multiprocessing import Process, Manager, Queue
 
+from util import logger
 from model.context import Context
 from wordle import compute_word_info
 from wordle import wordle_db_process
@@ -19,7 +20,7 @@ def process_info(word_list: list[str], info_level: int=1):
     if info_level == 1:
         process_first_word_list(word_list)
     elif info_level == 2:
-        process_second_word_list(word_list)
+        process_second_word_list()
 
 def process_first_word_list(word_list: list[str]):
     logging.info(f'Computing first guess information parallely for word list (length: {len(word_list)})')
@@ -45,8 +46,23 @@ def process_first_word_list(word_list: list[str]):
     
     wordle_db_process.stop_process()
     progress_queue.put(__STOP_PROCESS__)
+    logger.do_rollover()
 
-def process_second_word_list(base_word: str):
+def process_second_word_list():
+    logging.info(f'Computing second guess information for top 25 fist words information gain')
+
+    max_info_word_list = context.read_db_conn.get_first_word_max_info()
+    logging.info(f'First words with max information gain: {max_info_word_list}')
+
+    for _word_id, word, _word_info in max_info_word_list:
+        _process_second_word(word)
+        
+        # Clear screen
+        print("\033[H\033[J", end="")
+        logger.do_rollover()
+
+#region Internal Methods
+def _process_second_word(base_word: str):
     logging.info(f'Computing second guess information parallely for word: {base_word}')
     base_word_info = context.read_db_conn.get_first_word_info(base_word)
     base_word_id = base_word_info[0]
@@ -75,7 +91,6 @@ def process_second_word_list(base_word: str):
     if progress_queue:
         progress_queue.put(__STOP_PROCESS__)
 
-#region Internal Methods
 def _create_word_queue(word_list: list[str]) -> Queue:
     manager = Manager()
     word_queue: Queue = manager.Queue()

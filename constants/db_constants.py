@@ -16,6 +16,7 @@ DB_KEY_UPDATE_SECOND_WORD_STATUS = 'UPDATE_SECOND_WORD_STATUS'
 INSERT_FIRST_LEVEL_INFO_GAIN  = 'INSERT INTO first_level_info_gain (word, info_gain) \
                                     VALUES (%s, %s) ON CONFLICT DO NOTHING;'
 SELECT_FIRST_WORD_INFO        = 'SELECT * FROM first_level_info_gain WHERE word=%s;'
+SELECT_FIRST_WORD_MAX_INFO    = 'SELECT * FROM first_level_info_gain ORDER BY info_gain DESC LIMIT %s;'
 
 # Second Level Table
 INSERT_SECOND_LEVEL_INFO_GAIN = 'INSERT INTO second_level_info_gain (word, info_gain, parent_id) \

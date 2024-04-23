@@ -36,6 +36,17 @@ class WordleDB:
             res = cursor.fetchone()
             self._db_conn.commit()
         return res
+    
+    def get_first_word_max_info(self, n_words: int=25):
+        res = None
+        with self._db_conn.cursor() as cursor:
+            cursor.execute(
+                query=SELECT_FIRST_WORD_MAX_INFO,
+                vars=(n_words, )
+            )
+            res = cursor.fetchall()
+            self._db_conn.commit()
+        return res
     #endregion
 
     #region Second Word Table
