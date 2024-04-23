@@ -4,9 +4,9 @@ import itertools
 from tqdm import tqdm
 from multiprocess import ProcessPool
 from multiprocessing import Process, Manager, Queue
-\
-from model import Context
+
 from model import WordleException
+from model.context import Context
 
 from wordle import compute_word_info
 from constants.app_constants import *
@@ -16,7 +16,7 @@ from constants.db_constants import *
 context = Context()
 __STOP_PROCESS__ = '__stop_process__'
 
-def retrieve_best_word(prefix: str) -> tuple[str, float]:
+def retrieve_best_word(prefix: str, skip_db_store: bool=False) -> tuple[str, float]:
     logging.info(f'Retrieving word with max info for prefix: {prefix}')
 
     db_result = context.db_conn.get_prefix(prefix=prefix)
@@ -26,11 +26,12 @@ def retrieve_best_word(prefix: str) -> tuple[str, float]:
 
     logging.info(f'Prefix not found in DB, proceeding to computation | Prefix: {prefix}')
     next_word, info_gain = _compute_best_word_for_prefix(prefix=prefix)
-    context.db_conn.insert_prefix(
-        prefix=prefix,
-        word=next_word,
-        info_gain=info_gain
-    )
+    if not skip_db_store:
+        context.db_conn.insert_prefix(
+            prefix=prefix,
+            word=next_word,
+            info_gain=info_gain
+        )
 
     return next_word, info_gain
 
@@ -46,7 +47,6 @@ def _compute_best_word_for_prefix(prefix: str) -> tuple[str, float]:
         return '', 0.0
 
     word_list = base_wordle.possible_words_left
-    word_list = [context.id_to_word_map[word_id] for word_id in word_list]
     logging.info(f'Possible words to compute: {len(word_list)} | Prefix: {prefix}')
 
     if len(word_list) == 0:

@@ -34,9 +34,7 @@ class Wordle:
         self.guesses.append(guess)
         self.tile_patterns.append(pattern)
 
-        possible_words = context.word_tree.possible_words(self.tile_letters)
-        for word in possible_words:
-            self.possible_words_left.add(context.word_to_id_map[word])
+        self.possible_words_left = context.word_tree.possible_words(self.tile_letters)
         self._compute_stats(context.n_words)
     
     def copy(self) -> Wordle:

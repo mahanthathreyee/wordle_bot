@@ -4,13 +4,11 @@ from constants.app_constants import *
 
 class WordleWord:
     word: str = ''
-    word_id: int = 0
     patterns: dict[str, Wordle]
     information_gain: float = 0
 
-    def __init__(self, word: str, word_id: int) -> None:
+    def __init__(self, word: str) -> None:
         self.word = word
-        self.word_id = word_id
         self.patterns = {}
 
     #region Internal Methods

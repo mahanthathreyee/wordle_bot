@@ -13,8 +13,6 @@ class Context:
     word_tree: Trie = None
     word_list: list[str] = []
     guess_patterns: list[str] = []
-    word_to_id_map: dict[str, int] = {}
-    id_to_word_map: dict[str, int] = {}
     db_conn: WordleDB = None
 
     def __init__(self):
@@ -29,26 +27,7 @@ class Context:
 
         self.guess_patterns = retrieve_dataset.retrieve_guess_patterns()
 
-        self.word_to_id_map = self._generate_word_to_id()
-        self.id_to_word_map = self._generate_id_to_word()
-
         self.db_conn = WordleDB()
-
-    #region Internal Methods
-    def _generate_word_to_id(self) -> dict[str, int]:
-        res = {}
-        for idx, word in enumerate(self.word_list):
-            res[word] = idx
-        
-        return res
-        
-    def _generate_id_to_word(self) -> dict[str, int]:
-        res = {}
-        for idx, word in enumerate(self.word_list):
-            res[idx] = word
-        
-        return res
-    #endregion
 
     #region Decorators
     def __json__(self):

@@ -5,7 +5,7 @@ from multiprocessing import Queue
 from model import Wordle
 from model import WordleWord
 from model import WordleException
-from model import Context
+from model.context import Context
 
 from util import wordle_util
 from util import info_gain_util
@@ -120,8 +120,7 @@ def _compute_word(guess: str, base_wordle: Wordle=None) -> WordleWord:
         wordle_word = base_wordle.get_db_prefix()
     
     word = WordleWord(
-        word=wordle_word, 
-        word_id=context.word_to_id_map[guess]
+        word=wordle_word
     )
     word.patterns = wordle_patterns
     

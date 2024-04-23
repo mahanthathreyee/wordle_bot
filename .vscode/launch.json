@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: run.py",
+            "name": "Python Debugger: game.py",
             "type": "debugpy",
             "request": "launch",
-            "program": "run.py",
+            "program": "game.py",
             "console": "integratedTerminal"
         }
     ]
